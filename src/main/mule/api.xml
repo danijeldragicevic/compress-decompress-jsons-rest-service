@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <http:listener-config name="api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
@@ -16,7 +16,7 @@
         </http:listener>
         <apikit:router config-ref="api-config" />
         <error-handler>
-            <on-error-propagate type="APIKIT:BAD_REQUEST">
+            <on-error-propagate type="APIKIT:BAD_REQUEST" enableNotifications="true" logException="true">
                 <ee:transform>
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
@@ -94,6 +94,19 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="09b79012-5475-45c8-bf79-4cf307f69d5d" type="EMPLOYEE_API:BAD_REQUEST">
+				<ee:transform doc:name="Transform Message" doc:id="76be3286-a391-4b74-917d-a19225b46126">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
         </error-handler>
     </flow>
     <flow name="api-console">
@@ -123,13 +136,16 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="post:\employees:application\json:api-config">
-		<flow-ref doc:name="process-employees" doc:id="ea9406c6-bf42-4b8f-b4c4-e50aa5c7f156" name="process-employees"/>
+    <flow name="post:\employees:multipart\form-data:api-config">
+        <flow-ref doc:name="process-employees" doc:id="30a0b5a4-f4b5-45a8-a9b1-8ad8325b3934" name="process-employees" />
     </flow>
     <flow name="post:\employees:application\octet-stream:api-config">
-		<flow-ref doc:name="process-employees" doc:id="1a9dcb85-ea09-4e9c-89c2-eba8ef454319" name="process-employees"/>
+        <flow-ref doc:name="process-employees" doc:id="1a9dcb85-ea09-4e9c-89c2-eba8ef454319" name="process-employees" />
     </flow>
     <flow name="post:\employees:application\zip:api-config">
-		<flow-ref doc:name="process-employees" doc:id="6515647e-e92d-477e-9244-647cfd17f2e8" name="process-employees"/>
+        <flow-ref doc:name="process-employees" doc:id="6515647e-e92d-477e-9244-647cfd17f2e8" name="process-employees" />
+    </flow>
+    <flow name="post:\employees:application\json:api-config">
+        <flow-ref doc:name="process-employees" doc:id="ea9406c6-bf42-4b8f-b4c4-e50aa5c7f156" name="process-employees" />
     </flow>
 </mule>

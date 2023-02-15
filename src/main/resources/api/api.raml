@@ -1,5 +1,5 @@
 #%RAML 1.0
-title: employee-api
+title: employees-api
 
 traits:
   errorTrait: !include traits/error-trait.raml
@@ -15,8 +15,9 @@ traits:
         type: string
         example: "application/json"
     body:
-      application/zip:
+      multipart/form-data:
       application/octet-stream:
+      application/zip:
       application/json:
         type: !include /ref/employees-schema.json
         example: !include /ref/employees-example.json

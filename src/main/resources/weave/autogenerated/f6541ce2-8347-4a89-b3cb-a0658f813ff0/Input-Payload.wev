@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_f6541ce2_8347_4a89_b3cb_a0658f813ff0_Input_Payload = Array<{  firstName: String,   lastName: String,   _?: Any}> {"label": "employees-schema"}
-
