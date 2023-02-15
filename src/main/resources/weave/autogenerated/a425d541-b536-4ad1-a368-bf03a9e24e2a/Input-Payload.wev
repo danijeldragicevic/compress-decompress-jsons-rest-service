@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_a425d541_b536_4ad1_a368_bf03a9e24e2a_Input_Payload = Array<{  firstName: String,   lastName: String,   _?: Any}> {"label": "employees-schema"}
+

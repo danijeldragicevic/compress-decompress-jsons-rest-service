@@ -1,0 +1,22 @@
+#%RAML 1.0
+title: employee-api
+
+traits:
+  errorTrait: !include traits/error-trait.raml
+  successTrait: !include traits/success-trait.raml
+
+/employees:
+  post:
+    description: Create employees from JSON payload
+    is: [successTrait, errorTrait]
+    headers:
+      content-type:
+        required: true
+        type: string
+        example: "application/json"
+    body:
+      application/zip:
+      application/octet-stream:
+      application/json:
+        type: !include /ref/employees-schema.json
+        example: !include /ref/employees-example.json

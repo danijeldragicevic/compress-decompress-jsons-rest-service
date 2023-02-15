@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:compression="http://www.mulesoft.org/schema/mule/compression"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="fbccd7e2-0d9a-4d8a-a3ea-802b07bceeac" />
+	<sub-flow name="process-employees" doc:id="a425d541-b536-4ad1-a368-bf03a9e24e2a" >
+		<choice doc:name="Choice on content-type" doc:id="8662abf3-9d21-4f9a-8841-cde07cafe308" >
+			<when expression="#['application/json' == attributes.headers.'content-type']">
+				<flow-ref doc:name="transform-payload" doc:id="be2150ff-e624-48e6-8747-5a4aca110cfa" name="transform-payload"/>
+				<flow-ref doc:name="store-payload" doc:id="44413ff8-74da-4a16-ba4e-932b5aa7014c" name="store-payload"/>
+			</when>
+			<otherwise >
+				<compression:decompress doc:name="Decompress the payload" doc:id="745c4793-4198-473e-91b6-d441ff738157" outputMimeType="application/json">
+					<compression:decompressor >
+						<compression:zip-decompressor />
+					</compression:decompressor>
+				</compression:decompress>
+				<flow-ref doc:name="transform-payload" doc:id="0afc1b09-a1ff-40b5-9214-8af9121a6d7f" name="transform-payload"/>
+				<flow-ref doc:name="store-payload" doc:id="d6c7f96c-d614-4636-95c7-a70fd3c40914" name="store-payload"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Create response" doc:id="a1d66240-170b-4783-a604-d89d8a314913" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Employees created"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="transform-payload" doc:id="f6541ce2-8347-4a89-b3cb-a0658f813ff0" >
+		<ee:transform doc:name="Enrich and convert to CSV" doc:id="d2124e88-c70e-4cfc-a652-e047b5e76fd8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ((item, index) -> {
+	id: (index + 1),
+	firstName: item.firstName,
+	lastName: item.lastName,
+	createdAt: now() as DateTime
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="store-payload" doc:id="d50f21ba-e85d-4aef-ab77-c46a5afba5db" >
+		<file:write doc:name="Write to local dir" doc:id="613ac90b-28e5-425d-ae9a-1013dcda3fcc" config-ref="File_Config" path="/Users/ddanijel/AnypointStudio/ca/mule4/employees-api/src/main/resources/output/employees-processed.csv"/>
+	</sub-flow>
+</mule>
