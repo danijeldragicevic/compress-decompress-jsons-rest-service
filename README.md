@@ -2,8 +2,8 @@
 Mule4 example app. Able to receive and produce compressed files.
 
 Service is able to:
-- receive payload as plain JSON file and store it to the local directory as compressed file and
-- receive payloas as compressed JSON file and store it to the local directory as uncompressed file.
+- receive JSON data, compress it to ZIP format and store in local file;
+- receive zipped data, decompress it to JSON format and store in local file.
 
 # Technology
 - RAML 1.0
