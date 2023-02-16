@@ -3,16 +3,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.mycompany</groupId>
-	<artifactId>employees-api</artifactId>
+	<artifactId>compress-decompress-json-api</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>mule-application</packaging>
 
-	<name>employees-api</name>
+	<name>compress-decompress-json-api</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
 		<app.runtime>4.4.0-20211227</app.runtime>
 		<mule.maven.plugin.version>3.5.2</mule.maven.plugin.version>
 	</properties>
@@ -52,6 +51,7 @@
 			<version>1.5.8</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
+		<!-- Additional dependency, to be able to compress/decompress the payload -->
 		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-compression-module</artifactId>
@@ -92,5 +92,4 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
-
 </project>

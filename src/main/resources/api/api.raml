@@ -1,23 +1,30 @@
 #%RAML 1.0
-title: employees-api
+title: compress-decompress-json-api
 
 traits:
-  errorTrait: !include traits/error-trait.raml
   successTrait: !include traits/success-trait.raml
+  errorTrait: !include traits/error-trait.raml
 
-/employees:
+/compress:
+  description: Compress payload and store to the local dir
   post:
-    description: Create employees from JSON payload
     is: [successTrait, errorTrait]
     headers:
       content-type:
-        required: true
         type: string
+        required: true
         example: "application/json"
     body:
-      multipart/form-data:
-      application/octet-stream:
-      application/zip:
       application/json:
-        type: !include /ref/employees-schema.json
-        example: !include /ref/employees-example.json
+
+/decompress:
+  description: Decompress payload and store to the local dir
+  post:
+    is: [successTrait, errorTrait]
+    headers:
+      content-type:
+        type: string
+        required: true
+        example: "application/zip"
+    body:
+      application/zip:

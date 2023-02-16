@@ -94,19 +94,19 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="09b79012-5475-45c8-bf79-4cf307f69d5d" type="EMPLOYEE_API:BAD_REQUEST">
-				<ee:transform doc:name="Transform Message" doc:id="76be3286-a391-4b74-917d-a19225b46126">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6bc25fc7-6a5c-4dd9-ae47-8d7b9c6a5180" type="APP:BAD_REQUEST">
+                <set-variable value="#[400]" doc:name="Set httpStatus" doc:id="4f0c1584-b991-4d9a-9f3c-baf9e4d95784" variableName="httpStatus" />
+                <ee:transform doc:name="Transform Message" doc:id="f8707ca4-d149-4abd-9251-c4a06cf4a9fa">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Bad request"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
+{
+	message: error.description
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
         </error-handler>
     </flow>
     <flow name="api-console">
@@ -136,16 +136,14 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="post:\employees:multipart\form-data:api-config">
-        <flow-ref doc:name="process-employees" doc:id="30a0b5a4-f4b5-45a8-a9b1-8ad8325b3934" name="process-employees" />
+    <flow name="post:\compress:application\json:api-config">
+        <flow-ref doc:name="check-payload" doc:id="3075f644-edec-4939-8a05-7fdd8698180e" name="check-payload" />
+        <flow-ref doc:name="compress-payload" doc:id="57b39ffc-deef-42e3-912a-3bcda6d18f19" name="compress-payload" />
+        <flow-ref doc:name="create-response" doc:id="a5f3f9c8-c6bf-47f6-9551-128c0fd0e9cf" name="create-response" />
     </flow>
-    <flow name="post:\employees:application\octet-stream:api-config">
-        <flow-ref doc:name="process-employees" doc:id="1a9dcb85-ea09-4e9c-89c2-eba8ef454319" name="process-employees" />
-    </flow>
-    <flow name="post:\employees:application\zip:api-config">
-        <flow-ref doc:name="process-employees" doc:id="6515647e-e92d-477e-9244-647cfd17f2e8" name="process-employees" />
-    </flow>
-    <flow name="post:\employees:application\json:api-config">
-        <flow-ref doc:name="process-employees" doc:id="ea9406c6-bf42-4b8f-b4c4-e50aa5c7f156" name="process-employees" />
+    <flow name="post:\decompress:application\zip:api-config">
+        <flow-ref doc:name="check-payload" doc:id="9a6c01aa-790c-4e88-bbdd-ae22820483c9" name="check-payload" />
+		<flow-ref doc:name="decompress-payload" doc:id="929a72e0-4603-4b41-810a-1aa3242d86bd" name="decompress-payload"/>
+		<flow-ref doc:name="create-response" doc:id="df808818-dc56-4f02-b513-118008d3311e" name="create-response"/>
     </flow>
 </mule>

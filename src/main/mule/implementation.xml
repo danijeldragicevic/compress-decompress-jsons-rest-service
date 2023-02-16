@@ -1,57 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:compression="http://www.mulesoft.org/schema/mule/compression"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:compression="http://www.mulesoft.org/schema/mule/compression"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
-	<file:config name="File_Config" doc:name="File Config" doc:id="fbccd7e2-0d9a-4d8a-a3ea-802b07bceeac" />
-	<sub-flow name="process-employees" doc:id="a425d541-b536-4ad1-a368-bf03a9e24e2a" >
-		<choice doc:name="Check if the payload is empty" doc:id="423f9562-4543-4fc9-bfa4-a519c123ff26" >
-			<when expression="#[not isEmpty(payload)]">
-				<choice doc:name="Check content-type" doc:id="8662abf3-9d21-4f9a-8841-cde07cafe308">
-			<when expression="#[not ('application/json' == attributes.headers.'content-type')]">
-						<compression:decompress doc:name="Decompress the payload" doc:id="745c4793-4198-473e-91b6-d441ff738157" outputMimeType="application/json">
-					<compression:decompressor>
-						<compression:zip-decompressor />
-					</compression:decompressor>
-				</compression:decompress>
-			</when>
-		</choice>
-				<ee:transform doc:name="Enrich and convert to CSV" doc:id="d2124e88-c70e-4cfc-a652-e047b5e76fd8">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/csv
----
-payload map ((item, index) -> {
-	id: (index + 1),
-	firstName: item.firstName,
-	lastName: item.lastName,
-	createdAt: now() as DateTime
-})]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-				<compression:compress doc:name="Compress the payload" doc:id="d32e576e-6444-489d-8ad2-9d3cde7c986e" outputMimeType="application/csv">
-					<compression:compressor >
-						<compression:zip-compressor />
-					</compression:compressor>
-				</compression:compress>
-				<file:write doc:name="Write to local dir" doc:id="613ac90b-28e5-425d-ae9a-1013dcda3fcc" config-ref="File_Config" path="/Users/ddanijel/AnypointStudio/ca/mule4/employees-api/src/main/resources/output/employees-processed.zip" />
-				<ee:transform doc:name="Create response" doc:id="a1d66240-170b-4783-a604-d89d8a314913">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "Employees created"
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+	<file:config name="File_Config" doc:name="File Config" doc:id="a2da6151-0086-40ec-bb2b-ce0cf556fa5b" />
+	<sub-flow name="check-payload" doc:id="90fc35a9-f801-4288-a492-238bfe2dc024" >
+		<choice doc:name="Is payload empty?" doc:id="4edaf2f9-3620-4876-b69c-7613de8be77f" >
+			<when expression="#[isEmpty(payload)]">
+				<raise-error doc:name="Bad request" doc:id="8c0d8348-95f1-4c95-a3be-0bc73cfbd06b" type="APP:BAD_REQUEST" description="Empty payload sent!" />
 			</when>
 			<otherwise>
-				<raise-error doc:name="Raise error" doc:id="c69ca286-cae3-4a36-b247-3369e5a45a2d" type="EMPLOYEE_API:BAD_REQUEST"/>
+				<logger level="INFO" doc:name="Payload received msg" doc:id="2e90ab32-d44e-475b-94e3-64affad47bdd" message='#[%dw 2.0 output text/plain --- "Payload received"]' />
 			</otherwise>
 		</choice>
+	</sub-flow>
+	<sub-flow name="compress-payload" doc:id="9b66332e-dedc-4e19-806f-6a0f69d0d0a2" >
+		<compression:compress doc:name="Compress payload" doc:id="2b21f480-1723-4f38-a67e-6dc5eaed5ff3">
+			<compression:compressor >
+				<compression:zip-compressor />
+			</compression:compressor>
+		</compression:compress>
+		<file:write doc:name="Write to local dir" doc:id="8f3232c0-ef70-4da9-9355-df387d08d67f" path="/Users/ddanijel/AnypointStudio/ca/mule4/compress-decompress-json-api/src/main/resources/output/compressed-payload.zip" config-ref="File_Config"/>
+	</sub-flow>
+	<sub-flow name="decompress-payload" doc:id="645a8408-5b91-414a-b903-a74f92160816" >
+		<compression:decompress doc:name="Decompress payload" doc:id="45f2da1e-1e54-4f16-91c5-375c1f50e4ab" >
+			<compression:decompressor >
+				<compression:zip-decompressor />
+			</compression:decompressor>
+		</compression:decompress>
+		<file:write doc:name="Write to local dir" doc:id="5c0a0155-e8c3-48a7-aa30-8031a62680c2" config-ref="File_Config" path="/Users/ddanijel/AnypointStudio/ca/mule4/compress-decompress-json-api/src/main/resources/output/uncompressed-payload.json"/>
+	</sub-flow>
+	<sub-flow name="create-response" doc:id="0aa92b8b-d5fb-45d1-a34a-83b066ffe0b0" >
+		<ee:transform doc:name="Transform Message" doc:id="a5196492-2a81-44c0-8a52-b4c4e5fe2899" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{ "message" : "Successfully processed" }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</sub-flow>
 </mule>

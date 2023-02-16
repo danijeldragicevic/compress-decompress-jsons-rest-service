@@ -43,6 +43,7 @@ local.properties
 # --------------- #
 target/
 src/main/resources/output/
+src/main/resources/weave/
 .mule/**
 .mule/**/*
 .DS_Store
