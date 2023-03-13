@@ -13,7 +13,7 @@ Service is able to:
 Checkout from this repository and import into Anypoint Studio 7.X.X.
 
 # Exposed endpoints:
-By default, service will run on **http://localhost:8081/** </br>
+By default, service will run on **http://localhost:8081** </br>
 Following endpoints will be exposed:
 | Methods | Urls            | Action                                                  |
 |---------|-----------------|---------------------------------------------------------|
