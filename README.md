@@ -1,4 +1,4 @@
-# Compress/Decompress JSONs API
+# Compress/Decompress JSON files REST service
 Mule4 example app. Able to receive and produce compressed files.
 
 Service is able to:
